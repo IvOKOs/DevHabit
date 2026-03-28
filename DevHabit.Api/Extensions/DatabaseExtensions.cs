@@ -11,33 +11,15 @@ public static class DatabaseExtensions
         using IServiceScope scope = app.Services.CreateScope();
         await using ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        int retries = 10;
-        while (true)
+        try
         {
-            try
-            {
-                await app.ApplyMigrationsAsync();
-                break;
-            }
-            catch (SqlException ex)
-            {
-                if (retries-- == 0)
-                {
-                    throw;
-                }
-                app.Logger.LogInformation(ex,"Waiting for SQL Server...");
-                await Task.Delay(5000);
-            }
+            await dbContext.Database.MigrateAsync();
+            app.Logger.LogInformation("Database migrations applied successfully.");
         }
-        //try
-        //{
-        //    await dbContext.Database.MigrateAsync();
-        //    app.Logger.LogInformation("Database migrations applied successfully.");
-        //}
-        //catch (Exception ex)
-        //{
-        //    app.Logger.LogError(ex, "An error occured while applying database migrations.");
-        //    throw;
-        //}
+        catch (Exception ex)
+        {
+            app.Logger.LogError(ex, "An error occured while applying database migrations.");
+            throw;
+        }
     }
 }
