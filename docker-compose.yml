@@ -15,6 +15,19 @@ services:
       # Aspire Dashboard
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://devhabit.aspire-dashboard:18889
       - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+    depends_on:
+      - devhabit.sql
+
+  devhabit.sql:
+     image: mcr.microsoft.com/mssql/server:2022-latest
+     environment:
+        SA_PASSWORD: "Sql12345!"
+        ACCEPT_EULA: "Y"
+        MSSQL_PID: "Developer"
+     volumes:
+      - sql_data:/var/opt/mssql
+     ports:
+      - 1433:1433
 
   devhabit.seq:
     image: datalust/seq:2024.3 # or latest
@@ -32,3 +45,6 @@ services:
       DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: true
     ports:
       - 18888:18888
+
+volumes:
+  sql_data:
