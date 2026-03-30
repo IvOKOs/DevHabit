@@ -19,13 +19,32 @@ public sealed class Habit
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
     public DateTime? LastCompletedAtUtc { get; set; } // when last completed a specific habit that has attached milestone
-
+    
     [NotMapped]
-    public Milestone Milestone => new Milestone
+    public Milestone? Milestone
     {
-        Target = new Target { Value = MilestoneTarget ?? 0 },
-        Current = new Target { Value = MilestoneCurrent ?? 0 }
-    };
+        get
+        {
+            if (MilestoneTarget == null && MilestoneCurrent == null)
+            {
+                return null;
+            }
+            return new Milestone { Target = MilestoneTarget ?? 0, Current = MilestoneCurrent ?? 0 };
+        }
+        set
+        {
+            if (value == null)
+            {
+                MilestoneTarget = null;
+                MilestoneCurrent = null;
+            }
+            else
+            {
+                MilestoneTarget = value.Target;
+                MilestoneCurrent = value.Current;
+            }
+        }
+    }
 }
 
 public enum HabitType
@@ -64,8 +83,8 @@ public class Target
 
 public class Milestone
 {// when these two values are equal => goal is completed
-    public Target Target { get; set; }
-    public Target Current { get; set; }
+    public int Target { get; set; }
+    public int Current { get; set; }
 }
 
 
