@@ -25,32 +25,6 @@ public sealed record HabitDto
     public required DateTime CreatedAtUtc { get; init; }
     public DateTime? UpdatedAtUtc { get; init; }
     public DateTime? LastCompletedAtUtc { get; init; }
-
-    
-    //public MilestoneDto Milestone
-    //{
-    //    get
-    //    {
-    //        if (MilestoneTarget == null && MilestoneCurrent == null)
-    //        {
-    //            return null;
-    //        }
-    //        return new MilestoneDto { Current = MilestoneCurrent ?? 0, Target = MilestoneTarget ?? 0 };
-    //    }
-    //    init
-    //    {
-    //        if (value == null)
-    //        {
-    //            MilestoneTarget = null;
-    //            MilestoneCurrent = null;
-    //        }
-    //        else
-    //        {
-    //            MilestoneTarget = value.Target;
-    //            MilestoneCurrent = value.Current;
-    //        }
-    //    }
-    //}
 }
 
 public sealed record FrequencyDto

@@ -1,6 +1,7 @@
 ﻿using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,5 +54,44 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
 
         HabitDto habitDto = habit.ToDto();
         return CreatedAtAction(nameof(GetHabit), new { id = habitDto.Id }, habitDto);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult> UpdateHabit(string id, UpdateHabitDto updateHabitDto)
+    {
+        Habit? habit = await dbContext.Habits.FindAsync(id);
+        if(habit is null)
+        {
+            return NotFound();
+        }
+        habit.UpdateFromDto(updateHabitDto);
+        await dbContext.SaveChangesAsync();
+        return NoContent();
+    }
+
+    [HttpPatch("{id}")]
+    public async Task<ActionResult> PatchHabit(string id, JsonPatchDocument<HabitDto> patchDocument)
+    {
+        Habit? habit = await dbContext.Habits.FindAsync(id);
+        if (habit is null)
+        {
+            return NotFound();
+        }
+        HabitDto habitDto = habit.ToDto();
+        patchDocument.ApplyTo(habitDto, ModelState);
+
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        // support update only on name and description
+        habit.Name = habitDto.Name;
+        habit.Description = habitDto.Description;
+        habit.UpdatedAtUtc = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
     }
 }
