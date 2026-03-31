@@ -20,31 +20,9 @@ public sealed class Habit
     public DateTime? UpdatedAtUtc { get; set; }
     public DateTime? LastCompletedAtUtc { get; set; } // when last completed a specific habit that has attached milestone
     
-    [NotMapped]
-    public Milestone? Milestone
-    {
-        get
-        {
-            if (MilestoneTarget == null && MilestoneCurrent == null)
-            {
-                return null;
-            }
-            return new Milestone { Target = MilestoneTarget ?? 0, Current = MilestoneCurrent ?? 0 };
-        }
-        set
-        {
-            if (value == null)
-            {
-                MilestoneTarget = null;
-                MilestoneCurrent = null;
-            }
-            else
-            {
-                MilestoneTarget = value.Target;
-                MilestoneCurrent = value.Current;
-            }
-        }
-    }
+    public List<HabitTag> HabitTags { get; set; }
+    public List<Tag> Tags { get; set; }
+    
 }
 
 public enum HabitType
