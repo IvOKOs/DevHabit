@@ -51,11 +51,9 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         CreateHabitDto createHabitDto,
         IValidator<CreateHabitDto> validator)
     {
-        ValidationResult validationResult = await validator.ValidateAsync(createHabitDto);
-        if(!validationResult.IsValid)
-        {
-            return BadRequest(validationResult.ToDictionary());
-        }
+        await validator.ValidateAndThrowAsync(createHabitDto); // this will validate the dto and if invalid =>
+                                                               // throws validation exception, which will be handled by
+                                                               // the validator handler and return a problem details response
 
         Habit habit = createHabitDto.ToEntity();
 

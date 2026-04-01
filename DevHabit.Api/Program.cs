@@ -1,5 +1,6 @@
 using DevHabit.Api.Database;
 using DevHabit.Api.Extensions;
+using DevHabit.Api.Middleware;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -14,7 +15,7 @@ builder.Services.AddControllers()
     .AddNewtonsoftJson();
 builder.Services.AddOpenApi();
 
-builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddProblemDetails(options =>
 {
@@ -23,6 +24,9 @@ builder.Services.AddProblemDetails(options =>
         context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
     };
 });// only exposing partial info about exception + some diagnostic details
+
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();// adding the global exception handler
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -55,6 +59,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     await app.ApplyMigrationsAsync();
 }
+
+//use built-in exception handling middleware
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
