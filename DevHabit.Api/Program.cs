@@ -1,5 +1,6 @@
 using DevHabit.Api.Database;
 using DevHabit.Api.Extensions;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using OpenTelemetry;
@@ -12,6 +13,16 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
     .AddNewtonsoftJson();
 builder.Services.AddOpenApi();
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(includeInternalTypes: true);
+
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = context =>
+    {
+        context.ProblemDetails.Extensions.TryAdd("requestId", context.HttpContext.TraceIdentifier);
+    };
+});// only exposing partial info about exception + some diagnostic details
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
