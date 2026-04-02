@@ -1,4 +1,5 @@
-﻿using DevHabit.Api.Database;
+﻿#pragma warning disable CA1862
+using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
 using FluentValidation;
@@ -14,10 +15,16 @@ namespace DevHabit.Api.Controllers;
 public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<HabitsCollectionDto>> GetHabits()
+    public async Task<ActionResult<HabitsCollectionDto>> GetHabits([FromQuery] HabitsQueryParameters query)
     {
-        List<HabitDto> habits = await dbContext
-            .Habits
+        query.Search = query.Search?.Trim().ToLower();
+
+        List<HabitDto> habits = await dbContext.Habits
+            .Where(h => query.Search == null || 
+                        h.Name.ToLower().Contains(query.Search) || 
+                        h.Description != null && h.Description.ToLower().Contains(query.Search))
+            .Where(h => query.Type == null || h.Type == query.Type)
+            .Where(h => query.Status == null || h.Status == query.Status)
             .Select(HabitQueries.ProjectToDto())
             .ToListAsync();
 
