@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CA1862
 using DevHabit.Api.Database;
+using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
 using FluentValidation;
@@ -15,25 +16,22 @@ namespace DevHabit.Api.Controllers;
 public sealed class HabitsController(ApplicationDbContext dbContext) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<HabitsCollectionDto>> GetHabits([FromQuery] HabitsQueryParameters query)
+    public async Task<ActionResult<PaginationResult<HabitDto>>> GetHabits([FromQuery] HabitsQueryParameters query)
     {
         query.Search = query.Search?.Trim().ToLower();
 
-        List<HabitDto> habits = await dbContext.Habits
-            .Where(h => query.Search == null || 
-                        h.Name.ToLower().Contains(query.Search) || 
+        IQueryable<HabitDto> habitsQuery = dbContext.Habits
+            .Where(h => query.Search == null ||
+                        h.Name.ToLower().Contains(query.Search) ||
                         h.Description != null && h.Description.ToLower().Contains(query.Search))
             .Where(h => query.Type == null || h.Type == query.Type)
             .Where(h => query.Status == null || h.Status == query.Status)
-            .Select(HabitQueries.ProjectToDto())
-            .ToListAsync();
+            .Select(HabitQueries.ProjectToDto());
 
-        var habitsColllection = new HabitsCollectionDto()
-        {
-            Data = habits
-        };
+        PaginationResult<HabitDto> paginationResult = await PaginationResult<HabitDto>
+            .CreateAsync(habitsQuery, query.Page, query.PageSize);
 
-        return Ok(habitsColllection);
+        return Ok(paginationResult);
     }
 
     [HttpGet("{id}")]

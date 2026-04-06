@@ -1,10 +1,6 @@
-﻿namespace DevHabit.Api.Dtos.Tags;
+﻿using DevHabit.Api.Dtos.Habits;
 
-
-public sealed record TagsCollectionDto
-{
-    public List<TagDto> Data { get; init; }
-}
+namespace DevHabit.Api.Dtos.Tags;
 
 public sealed record TagDto
 {
