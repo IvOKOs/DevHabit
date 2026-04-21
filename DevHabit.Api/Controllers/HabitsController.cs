@@ -48,7 +48,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
 
         var paginationResult = new PaginationResult<ExpandoObject>
         {
-            Items = dataShapingService.ShapeData(habits, query.Fields),
+            Items = dataShapingService.ShapeCollectionData(habits, query.Fields),
             TotalCount = totalCount,
             Page = query.Page,
             PageSize = query.PageSize
@@ -58,16 +58,16 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<HabitWithTagsDto>> GetHabit(
+    public async Task<IActionResult> GetHabit(
         string id,
         string? fields,
         DataShapingService dataShapingService)
     {
-        if (!dataShapingService.Validate<HabitDto>(query.Fields))
+        if (!dataShapingService.Validate<HabitDto>(fields))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: $"The provided data shaping fields are not valid: '{query.Fields}'");
+                detail: $"The provided data shaping fields are not valid: '{fields}'");
         }
 
         HabitWithTagsDto? habit = await dbContext
@@ -80,9 +80,10 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
         {
             return NotFound();
         }
-        
 
-        return Ok(habit);
+        ExpandoObject shapedObject = dataShapingService.ShapeData(habit, fields);
+
+        return Ok(shapedObject);
     }
 
     [HttpPost]

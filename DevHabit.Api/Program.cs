@@ -1,3 +1,4 @@
+using DevHabit.Api;
 using DevHabit.Api.Database;
 using DevHabit.Api.Extensions;
 using DevHabit.Api.Middleware;
@@ -8,6 +9,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using static DevHabit.Api.DependencyInjection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +19,7 @@ builder.AddControllers()
     .AddObservability()
     .AddApplicationServices();
 
-builder.Services.AddSingleton<ISortMappingDefinition, SortMappingDefinition<HabitDto, Habit>>(_ => HabitMapping.SortMappings);
+
 
 WebApplication app = builder.Build();
 

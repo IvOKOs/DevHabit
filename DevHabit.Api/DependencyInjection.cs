@@ -1,9 +1,13 @@
 ﻿using DevHabit.Api.Database;
+using DevHabit.Api.Dtos.Habits;
+using DevHabit.Api.Entities;
 using DevHabit.Api.Middleware;
 using DevHabit.Api.Service;
+using DevHabit.Api.Services.Sorting;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Newtonsoft.Json.Serialization;
 using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -16,7 +20,8 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
     {
         builder.Services.AddControllers()
-               .AddNewtonsoftJson();
+               .AddNewtonsoftJson(options => 
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
         builder.Services.AddOpenApi();
 
         return builder;
@@ -75,6 +80,7 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+        builder.Services.AddSingleton<ISortMappingDefinition, SortMappingDefinition<HabitDto, Habit>>(_ => HabitMapping.SortMappings);
         builder.Services.AddTransient<DataShapingService>();
 
         return builder;

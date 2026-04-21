@@ -34,7 +34,7 @@ public sealed class DataShapingService
         return (ExpandoObject)shapedObject;
     }
 
-    public List<ExpandoObject> ShapeData<T>(
+    public List<ExpandoObject> ShapeCollectionData<T>(
         IEnumerable<T> entities,// resources
         string? fields)// fields that I want to include in the data shaped response;
                       // fields is not nullable since we can't do data shaping if we don't have the fields
