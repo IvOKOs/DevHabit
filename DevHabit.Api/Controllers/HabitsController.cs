@@ -5,6 +5,7 @@ using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Service;
+using DevHabit.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.JsonPatch;
@@ -21,8 +22,15 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
     [HttpGet]
     public async Task<IActionResult> GetHabits(// we don't have a proper type to describe a data shaped response
         [FromQuery] HabitsQueryParameters query,
+        SortMappingProvider sortMappingProvider,
         DataShapingService dataShapingService)
     {
+        if(!sortMappingProvider.ValidateMappings<HabitDto, Habit>(query.Sort))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"The provided sort parameter is not valid: '{query.Sort}'");
+        }
         if (!dataShapingService.Validate<HabitDto>(query.Fields))
         {
             return Problem(
@@ -32,12 +40,15 @@ public sealed class HabitsController(ApplicationDbContext dbContext) : Controlle
 
         query.Search = query.Search?.Trim().ToLower();
 
+        SortMapping[] sortMappings = sortMappingProvider.GetMappings<HabitDto, Habit>();
+
         IQueryable<HabitDto> habitsQuery = dbContext.Habits
             .Where(h => query.Search == null ||
                         h.Name.ToLower().Contains(query.Search) ||
                         h.Description != null && h.Description.ToLower().Contains(query.Search))
             .Where(h => query.Type == null || h.Type == query.Type)
             .Where(h => query.Status == null || h.Status == query.Status)
+            .ApplySort(query.Sort, sortMappings)
             .Select(HabitQueries.ProjectToDto());
 
         int totalCount = await habitsQuery.CountAsync();

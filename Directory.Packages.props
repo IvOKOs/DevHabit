@@ -17,5 +17,6 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.15.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.0" />
     <PackageVersion Include="SonarAnalyzer.CSharp" Version="[10.21.0.135717,)" />
+    <PackageVersion Include="System.Linq.Dynamic.Core" Version="1.7.2" />
   </ItemGroup>
 </Project>
