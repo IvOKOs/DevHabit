@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Dynamic;
 using System.Reflection;
+using DevHabit.Api.Dtos.Common;
 
 namespace DevHabit.Api.Services;
 
@@ -36,9 +37,8 @@ public sealed class DataShapingService
 
     public List<ExpandoObject> ShapeCollectionData<T>(
         IEnumerable<T> entities,// resources
-        string? fields)// fields that I want to include in the data shaped response;
-                      // fields is not nullable since we can't do data shaping if we don't have the fields
-
+        string? fields,// fields that I want to include in the data shaped response;
+        Func<T, List<LinkDto>>? linksFactory)
     {
         HashSet<string> fieldsToSet = fields?
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -56,7 +56,6 @@ public sealed class DataShapingService
             .ToArray();// filter out only the props that are requested
         }
         
-
         List<ExpandoObject> shapedObjects = [];
         foreach(T entity in entities)
         {
@@ -64,6 +63,10 @@ public sealed class DataShapingService
             foreach(PropertyInfo propertyInfo in propertyInfos)
             {
                 shapedObject[propertyInfo.Name] = propertyInfo.GetValue(entity);
+            }
+            if(linksFactory is not null)
+            {
+                shapedObject["links"] = linksFactory(entity);
             }
             shapedObjects.Add((ExpandoObject)shapedObject);
         }
