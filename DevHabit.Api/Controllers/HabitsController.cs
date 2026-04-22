@@ -57,18 +57,23 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
             .Take(query.PageSize)
             .ToListAsync();
 
+        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
+
         var paginationResult = new PaginationResult<ExpandoObject>
         {
             Items = dataShapingService.ShapeCollectionData(
                 habits,
                 query.Fields,
-                h => CreateLinksForHabit(h.Id, query.Fields)),
+                includeLinks ? h => CreateLinksForHabit(h.Id, query.Fields) : null),
             TotalCount = totalCount,
             Page = query.Page,
             PageSize = query.PageSize
         };
-        paginationResult.Links = CreateLinksForHabits(query, paginationResult.HasNextPage, paginationResult.HasPreviousPage);
-
+        if (includeLinks)
+        {
+            paginationResult.Links = CreateLinksForHabits(query, paginationResult.HasNextPage, paginationResult.HasPreviousPage);
+        }
+        
         return Ok(paginationResult);
     }
 
@@ -76,7 +81,8 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
     public async Task<IActionResult> GetHabit(
         string id,
         string? fields,
-        DataShapingService dataShapingService)
+        DataShapingService dataShapingService,
+        [FromHeader(Name = "Accept")] string? accept)
     {
         if (!dataShapingService.Validate<HabitDto>(fields))
         {
@@ -98,9 +104,13 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
 
         ExpandoObject shapedObject = dataShapingService.ShapeData(habit, fields);
 
-        List<LinkDto> links = CreateLinksForHabit(id, fields);
+        bool includeLinks = accept == CustomMediaTypeNames.Application.HateoasJson;
 
-        shapedObject.TryAdd("links", links);
+        if (includeLinks)
+        {
+            List<LinkDto> links = CreateLinksForHabit(id, fields);
+            shapedObject.TryAdd("links", links);
+        }
 
         return Ok(shapedObject);
     }
