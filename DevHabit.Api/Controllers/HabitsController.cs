@@ -4,7 +4,7 @@ using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
-using DevHabit.Api.Service;
+using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;
 using FluentValidation;
 using FluentValidation.Results;

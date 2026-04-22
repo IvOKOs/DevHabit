@@ -2,7 +2,7 @@
 using System.Dynamic;
 using System.Reflection;
 
-namespace DevHabit.Api.Service;
+namespace DevHabit.Api.Services;
 
 public sealed class DataShapingService
 {

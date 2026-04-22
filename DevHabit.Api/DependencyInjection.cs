@@ -2,7 +2,7 @@
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Middleware;
-using DevHabit.Api.Service;
+using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
