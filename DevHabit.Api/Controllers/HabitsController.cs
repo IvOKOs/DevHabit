@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CA1862
 using System.Dynamic;
+using Asp.Versioning;
 using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Dtos.Habits;
@@ -17,6 +18,7 @@ namespace DevHabit.Api.Controllers;
 
 [ApiController]
 [Route("habits")]
+[ApiVersion(1.0)]
 public sealed class HabitsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
@@ -78,6 +80,7 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
     }
 
     [HttpGet("{id}")]
+    [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetHabit(
         string id,
         string? fields,
@@ -98,6 +101,45 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
             .FirstOrDefaultAsync();
 
         if(habit is null)
+        {
+            return NotFound();
+        }
+
+        ExpandoObject shapedObject = dataShapingService.ShapeData(habit, fields);
+
+        bool includeLinks = accept == CustomMediaTypeNames.Application.HateoasJson;
+
+        if (includeLinks)
+        {
+            List<LinkDto> links = CreateLinksForHabit(id, fields);
+            shapedObject.TryAdd("links", links);
+        }
+
+        return Ok(shapedObject);
+    }
+
+    [HttpGet("{id}")]
+    [ApiVersion(2.0)]
+    public async Task<IActionResult> GetHabitV2(
+        string id,
+        string? fields,
+        DataShapingService dataShapingService,
+        [FromHeader(Name = "Accept")] string? accept)
+    {
+        if (!dataShapingService.Validate<HabitDto>(fields))
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                detail: $"The provided data shaping fields are not valid: '{fields}'");
+        }
+
+        HabitWithTagsDtoV2? habit = await dbContext
+            .Habits
+            .Where(h => h.Id == id)
+            .Select(HabitQueries.ProjectToDtoWithTagsV2())
+            .FirstOrDefaultAsync();
+
+        if (habit is null)
         {
             return NotFound();
         }

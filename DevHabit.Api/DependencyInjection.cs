@@ -1,4 +1,5 @@
-﻿using DevHabit.Api.Database;
+﻿using Asp.Versioning;
+using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Middleware;
@@ -19,7 +20,7 @@ namespace DevHabit.Api;
 
 public static class DependencyInjection
 {
-    public static WebApplicationBuilder AddControllers(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddApiServices(this WebApplicationBuilder builder)
     {
         builder.Services.AddControllers()
                .AddNewtonsoftJson(options => 
@@ -30,8 +31,30 @@ public static class DependencyInjection
                 .OfType<NewtonsoftJsonOutputFormatter>()
                 .First();
 
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.JsonV1);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.JsonV2);
             formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJson);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJsonV1);
+            formatter.SupportedMediaTypes.Add(CustomMediaTypeNames.Application.HateoasJsonV2);
         });
+
+        builder.Services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1.0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+            //options.ApiVersionSelector = new CurrentImplementationApiVersionSelector(options);// highest supported version
+            //^ how the library determines what is the correct api version to use
+            options.ApiVersionSelector = new DefaultApiVersionSelector(options);// default version, which is 1.0 here
+
+            options.ApiVersionReader = ApiVersionReader.Combine(
+                new MediaTypeApiVersionReader(),// for application/json
+                new MediaTypeApiVersionReaderBuilder()// for custom media type = hateoas+json
+                .Template("application/vnd.dev-habit.hateoas.{version}+json")
+                .Build());
+        })
+        .AddMvc();
+
         builder.Services.AddOpenApi();
 
         return builder;

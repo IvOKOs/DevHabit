@@ -13,7 +13,7 @@ using static DevHabit.Api.DependencyInjection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.AddControllers()
+builder.AddApiServices()
     .AddErrorHandling()
     .AddDatabase()
     .AddObservability()
