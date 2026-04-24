@@ -25,45 +25,11 @@ public sealed class Habit
     
 }
 
-public enum HabitType
-{
-    None,
-    Binary, // complete a specific task or not
-    Measurable // track values
-}
-
-public enum HabitStatus
-{
-    None,
-    Ongoing,
-    Completed
-}
-
-public class Frequency
-{
-    public FrequencyType Type { get; set; } // count how often to perform a habit
-    public int TimesPerPeriod { get; set; }
-}
-
-public enum FrequencyType
-{
-    None,
-    Daily,
-    Weekly,
-    Monthly
-}
-
-public class Target
-{
-    public int Value { get; set; }
-    public string Unit { get; set; }
-}
-
-public class Milestone
-{// when these two values are equal => goal is completed
-    public int Target { get; set; }
-    public int Current { get; set; }
-}
+//public class Milestone
+//{// when these two values are equal => goal is completed
+//    public int Target { get; set; }
+//    public int Current { get; set; }
+//}
 
 
 

@@ -1,6 +1,9 @@
-﻿using DevHabit.Api.Database;
+﻿using System.Net.Mime;
+using DevHabit.Api.Database;
+using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Dtos.Tags;
 using DevHabit.Api.Entities;
+using DevHabit.Api.Services;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -12,10 +15,17 @@ namespace DevHabit.Api.Controllers;
 
 [ApiController]
 [Route("tags")]
-public class TagsController(ApplicationDbContext dbContext) : ControllerBase
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.JsonV2,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1,
+    CustomMediaTypeNames.Application.HateoasJsonV2)]
+public class TagsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
-    public async Task<ActionResult<TagsCollectionDto>> GetTags()
+    public async Task<ActionResult<TagsCollectionDto>> GetTags([FromHeader] AcceptHeaderDto acceptHeader)
     {
         List<TagDto> tags = await dbContext
             .Tags
@@ -26,11 +36,15 @@ public class TagsController(ApplicationDbContext dbContext) : ControllerBase
         {
             Items = tags
         };
+        if (acceptHeader.IncludeLinks)
+        {
+            tagsCollection.Links = CreateLinksForTags();
+        }
         return Ok(tagsCollection);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TagDto>> GetTag(string id)
+    public async Task<ActionResult<TagDto>> GetTag(string id, [FromHeader] AcceptHeaderDto acceptHeader)
     {
         TagDto? tagDto = await dbContext
             .Tags
@@ -41,6 +55,10 @@ public class TagsController(ApplicationDbContext dbContext) : ControllerBase
         if(tagDto is null)
         {
             return NotFound();
+        }
+        if (acceptHeader.IncludeLinks)
+        {
+            tagDto.Links = CreateLinksForTag(id);
         }
 
         return Ok(tagDto);
@@ -103,5 +121,28 @@ public class TagsController(ApplicationDbContext dbContext) : ControllerBase
         await dbContext.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    private List<LinkDto> CreateLinksForTags()
+    {
+        List<LinkDto> links =
+        [
+            linkService.Create(nameof(GetTags), "self", HttpMethods.Get),
+            linkService.Create(nameof(CreateTag), "create", HttpMethods.Post)
+        ];
+
+        return links;
+    }
+
+    private List<LinkDto> CreateLinksForTag(string id)
+    {
+        List<LinkDto> links =
+        [
+            linkService.Create(nameof(GetTag), "self", HttpMethods.Get, new { id }),
+            linkService.Create(nameof(UpdateTag), "update", HttpMethods.Put, new { id }),
+            linkService.Create(nameof(DeleteTag), "delete", HttpMethods.Delete, new { id })
+        ];
+
+        return links;
     }
 }

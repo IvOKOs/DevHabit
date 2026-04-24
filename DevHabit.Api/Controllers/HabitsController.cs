@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CA1862
 using System.Dynamic;
+using System.Net.Mime;
 using Asp.Versioning;
 using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Common;
@@ -19,6 +20,13 @@ namespace DevHabit.Api.Controllers;
 [ApiController]
 [Route("habits")]
 [ApiVersion(1.0)]
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.JsonV2,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1,
+    CustomMediaTypeNames.Application.HateoasJsonV2)]
 public sealed class HabitsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
 {
     [HttpGet]
@@ -59,19 +67,17 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
             .Take(query.PageSize)
             .ToListAsync();
 
-        bool includeLinks = query.Accept == CustomMediaTypeNames.Application.HateoasJson;
-
         var paginationResult = new PaginationResult<ExpandoObject>
         {
             Items = dataShapingService.ShapeCollectionData(
                 habits,
                 query.Fields,
-                includeLinks ? h => CreateLinksForHabit(h.Id, query.Fields) : null),
+                query.IncludeLinks ? h => CreateLinksForHabit(h.Id, query.Fields) : null),
             TotalCount = totalCount,
             Page = query.Page,
             PageSize = query.PageSize
         };
-        if (includeLinks)
+        if (query.IncludeLinks)
         {
             paginationResult.Links = CreateLinksForHabits(query, paginationResult.HasNextPage, paginationResult.HasPreviousPage);
         }
@@ -83,15 +89,14 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
     [MapToApiVersion(1.0)]
     public async Task<IActionResult> GetHabit(
         string id,
-        string? fields,
         DataShapingService dataShapingService,
-        [FromHeader(Name = "Accept")] string? accept)
+        [FromHeader] HabitsQueryParameters query)
     {
-        if (!dataShapingService.Validate<HabitDto>(fields))
+        if (!dataShapingService.Validate<HabitDto>(query.Fields))
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
-                detail: $"The provided data shaping fields are not valid: '{fields}'");
+                detail: $"The provided data shaping fields are not valid: '{query.Fields}'");
         }
 
         HabitWithTagsDto? habit = await dbContext
@@ -105,13 +110,11 @@ public sealed class HabitsController(ApplicationDbContext dbContext, LinkService
             return NotFound();
         }
 
-        ExpandoObject shapedObject = dataShapingService.ShapeData(habit, fields);
+        ExpandoObject shapedObject = dataShapingService.ShapeData(habit, query.Fields);
 
-        bool includeLinks = accept == CustomMediaTypeNames.Application.HateoasJson;
-
-        if (includeLinks)
+        if (query.IncludeLinks)
         {
-            List<LinkDto> links = CreateLinksForHabit(id, fields);
+            List<LinkDto> links = CreateLinksForHabit(id, query.Fields);
             shapedObject.TryAdd("links", links);
         }
 
