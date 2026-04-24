@@ -6,6 +6,8 @@ using DevHabit.Api.Middleware;
 using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
@@ -86,6 +88,15 @@ public static class DependencyInjection
                 .MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Application));
         });
 
+        //configure identity db context
+        builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
+        {
+            options.UseSqlServer(
+                builder.Configuration.GetConnectionString("Database"),//use the same db
+                sqlOptions => sqlOptions
+                .MigrationsHistoryTable(HistoryRepository.DefaultTableName, Schemas.Identity));// isolate the identity tables from the regular tables
+        });
+
         return builder;
     }
 
@@ -119,6 +130,16 @@ public static class DependencyInjection
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddTransient<LinkService>();
+
+        return builder;
+    }
+
+    //registering the authentication services
+    public static WebApplicationBuilder AddAuthenticationServices(this WebApplicationBuilder builder)
+    {
+        // these use UUIDs as primary keys
+        builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationIdentityDbContext>();
 
         return builder;
     }
