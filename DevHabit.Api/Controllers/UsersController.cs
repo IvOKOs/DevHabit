@@ -1,6 +1,7 @@
 ﻿using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Users;
 using DevHabit.Api.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ namespace DevHabit.Api.Controllers;
 
 
 [ApiController]
+[Authorize]// required authentication for all endpoints
 [Route("users")]
 public sealed class UsersController(ApplicationDbContext dbContext) : ControllerBase
 {
