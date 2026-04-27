@@ -6,6 +6,7 @@ namespace DevHabit.Api.Entities;
 public sealed class Habit
 {
     public string Id { get; set; } // string => I want to construct id with a prefix
+    public string UserId { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
     public HabitType Type { get; set; }

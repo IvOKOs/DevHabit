@@ -26,5 +26,9 @@ public sealed class HabitConfiguration : IEntityTypeConfiguration<Habit>
         builder.HasMany(h => h.Tags)
             .WithMany()
             .UsingEntity<HabitTag>();
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(h => h.UserId);
     }
 }

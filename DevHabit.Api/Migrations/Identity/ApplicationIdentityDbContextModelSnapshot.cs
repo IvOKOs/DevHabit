@@ -39,8 +39,7 @@ namespace DevHabit.Api.Migrations.Identity
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 

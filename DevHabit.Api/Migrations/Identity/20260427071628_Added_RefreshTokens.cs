@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DevHabit.Api.Migrations.Identity;
 
 /// <inheritdoc />
-public partial class Add_RefreshTokens : Migration
+public partial class Added_RefreshTokens : Migration
 {
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ public partial class Add_RefreshTokens : Migration
             columns: table => new
             {
                 Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                 Token = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                 ExpiresAtUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
             },

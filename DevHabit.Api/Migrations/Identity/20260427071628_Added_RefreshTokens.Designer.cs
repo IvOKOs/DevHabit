@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DevHabit.Api.Migrations.Identity
 {
     [DbContext(typeof(ApplicationIdentityDbContext))]
-    [Migration("20260426105533_Add_RefreshTokens")]
-    partial class Add_RefreshTokens
+    [Migration("20260427071628_Added_RefreshTokens")]
+    partial class Added_RefreshTokens
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -42,8 +42,7 @@ namespace DevHabit.Api.Migrations.Identity
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 

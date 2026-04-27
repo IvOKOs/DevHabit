@@ -24,13 +24,23 @@ namespace DevHabit.Api.Controllers;
     CustomMediaTypeNames.Application.HateoasJson,
     CustomMediaTypeNames.Application.HateoasJsonV1,
     CustomMediaTypeNames.Application.HateoasJsonV2)]
-public class TagsController(ApplicationDbContext dbContext, LinkService linkService) : ControllerBase
+public class TagsController(
+    ApplicationDbContext dbContext,
+    LinkService linkService,
+    UserContext userContext) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<TagsCollectionDto>> GetTags([FromHeader] AcceptHeaderDto acceptHeader)
     {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
         List<TagDto> tags = await dbContext
             .Tags
+            .Where(t => t.UserId == userId)
             .Select(TagQueries.ProjectToDto())
             .ToListAsync();
 
@@ -48,9 +58,15 @@ public class TagsController(ApplicationDbContext dbContext, LinkService linkServ
     [HttpGet("{id}")]
     public async Task<ActionResult<TagDto>> GetTag(string id, [FromHeader] AcceptHeaderDto acceptHeader)
     {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
         TagDto? tagDto = await dbContext
             .Tags
-            .Where(t => t.Id == id)
+            .Where(t => t.Id == id && t.UserId == userId)
             .Select(TagQueries.ProjectToDto())
             .FirstOrDefaultAsync();
 
@@ -71,6 +87,12 @@ public class TagsController(ApplicationDbContext dbContext, LinkService linkServ
         CreateTagDto createTagDto,
         IValidator<CreateTagDto> validator)
     {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
         ValidationResult validationResult = await validator.ValidateAsync(createTagDto);
         if (!validationResult.IsValid)
         {
@@ -85,7 +107,7 @@ public class TagsController(ApplicationDbContext dbContext, LinkService linkServ
                 statusCode: StatusCodes.Status409Conflict);
         }
 
-        Tag tag = createTagDto.ToEntity();
+        Tag tag = createTagDto.ToEntity(userId);
 
         dbContext.Tags.Add(tag);
         await dbContext.SaveChangesAsync();
@@ -98,7 +120,13 @@ public class TagsController(ApplicationDbContext dbContext, LinkService linkServ
     [HttpPut("{id}")]
     public async Task<ActionResult> UpdateTag(string id, UpdateTagDto updateTagDto)
     {
-        Tag? tag = await dbContext.Tags.FindAsync(id);
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        Tag? tag = await dbContext.Tags.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         if(tag is null)
         {
             return NotFound();
@@ -113,7 +141,13 @@ public class TagsController(ApplicationDbContext dbContext, LinkService linkServ
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteTag(string id)
     {
-        Tag? tag = await dbContext.Tags.FindAsync(id);
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        Tag? tag = await dbContext.Tags.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
         if(tag is null)
         {
             return NotFound();

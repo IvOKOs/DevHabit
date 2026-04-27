@@ -15,6 +15,13 @@ public sealed class TagConfiguration : IEntityTypeConfiguration<Tag>
 
         builder.Property(t => t.Description).HasMaxLength(500);
 
-        builder.HasIndex(t => new { t.Name }).IsUnique(); // not allowed to create a duplicate tag
+        //builder.HasIndex(t => new { t.Name }).IsUnique(); // not allowed to create a duplicate tag
+        //tag name should be scoped to each user
+        builder.HasIndex(t => new { t.UserId, t.Name }).IsUnique();// tag names are unique for each user
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
