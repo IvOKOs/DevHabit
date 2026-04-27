@@ -28,6 +28,7 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     await app.ApplyMigrationsAsync();
+    await app.SeedInitialDataAsync();
 }
 
 //use built-in exception handling middleware
