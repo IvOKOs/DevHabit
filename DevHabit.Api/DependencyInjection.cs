@@ -4,6 +4,7 @@ using Asp.Versioning;
 using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Habits;
 using DevHabit.Api.Entities;
+using DevHabit.Api.Jobs;
 using DevHabit.Api.Middleware;
 using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;
@@ -22,6 +23,7 @@ using OpenTelemetry;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Quartz;
 
 namespace DevHabit.Api;
 
@@ -159,6 +161,9 @@ public static class DependencyInjection
         builder.Services.Configure<EncryptionOptions>(builder.Configuration.GetSection("Encryption"));// values of the section will be mapped to this obj
         builder.Services.AddTransient<EncryptionService>();
 
+        builder.Services.Configure<GitHubAutomationOptions>(
+            builder.Configuration.GetSection(GitHubAutomationOptions.SectionName));
+
         return builder;
     }
 
@@ -188,6 +193,35 @@ public static class DependencyInjection
             });
 
         builder.Services.AddAuthorization();
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddBackgroundJobs(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddQuartz(q =>
+        {
+            // job to be done in the background
+            q.AddJob<GitHubAutomationSchedulerJob>(opts => opts.WithIdentity("github-automation-scheduler"));
+
+            // trigger is what fires the job
+            q.AddTrigger(opts => opts
+                .ForJob("github-automation-scheduler")
+                .WithIdentity("github-automation-scheduler-trigger")
+                .WithSimpleSchedule(s =>
+                {
+                    GitHubAutomationOptions settings = builder.Configuration
+                        .GetSection(GitHubAutomationOptions.SectionName)
+                        .Get<GitHubAutomationOptions>()!;
+
+                    s.WithIntervalInMinutes(settings.ScanIntervalMinutes)
+                        .RepeatForever();
+                }));
+        });
+
+        // for starting the Quartz scheduler
+        // without this jobs and triggers won't work
+        builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
         return builder;
     }

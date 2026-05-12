@@ -10,6 +10,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<HabitTag> HabitTags { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<GitHubAccessToken> GitHubAccessTokens { get; set; }
+    public DbSet<Entry> Entries { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

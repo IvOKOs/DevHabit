@@ -17,6 +17,7 @@ public sealed class Habit
     public DateOnly? EndDate { get; set; }
     public int? MilestoneTarget { get; set; }
     public int? MilestoneCurrent { get; set; }
+    public AutomationSource? AutomationSource { get; set; }
     public DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
     public DateTime? LastCompletedAtUtc { get; set; } // when last completed a specific habit that has attached milestone

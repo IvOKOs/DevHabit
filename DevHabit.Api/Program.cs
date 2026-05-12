@@ -20,6 +20,7 @@ builder.AddApiServices()
     .AddObservability()
     .AddApplicationServices()
     .AddAuthenticationServices()
+    .AddBackgroundJobs()
     .AddCorsPolicy();
 
 
@@ -41,7 +42,6 @@ app.UseCors(CorsOptions.PolicyName);
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();
