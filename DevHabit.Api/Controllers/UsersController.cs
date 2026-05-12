@@ -1,5 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System.Net.Mime;
+using System.Security.Claims;
 using DevHabit.Api.Database;
+using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Dtos.Users;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
@@ -14,7 +16,12 @@ namespace DevHabit.Api.Controllers;
 [ApiController]
 [Authorize(Roles = Roles.Member)]// required authentication + authorization for all endpoints
 [Route("users")]
-public sealed class UsersController(ApplicationDbContext dbContext, UserContext userContext) : ControllerBase
+[Produces(
+    MediaTypeNames.Application.Json,
+    CustomMediaTypeNames.Application.JsonV1,
+    CustomMediaTypeNames.Application.HateoasJson,
+    CustomMediaTypeNames.Application.HateoasJsonV1)]
+public sealed class UsersController(ApplicationDbContext dbContext, UserContext userContext, LinkService linkService) : ControllerBase
 {
     [Authorize(Roles = Roles.Admin)]
     [HttpGet("{id}")]
@@ -46,7 +53,7 @@ public sealed class UsersController(ApplicationDbContext dbContext, UserContext 
     }
 
     [HttpGet("me")]
-    public async Task<ActionResult<UserDto>> GetCurrentUser()
+    public async Task<ActionResult<UserDto>> GetCurrentUser([FromHeader] AcceptHeaderDto acceptHeaderDto)
     {
         string? userId = await userContext.GetUserIdAsync();
         if (string.IsNullOrWhiteSpace(userId))
@@ -65,6 +72,45 @@ public sealed class UsersController(ApplicationDbContext dbContext, UserContext 
             return NotFound();
         }
 
+        if (acceptHeaderDto.IncludeLinks)
+        {
+            userDto.Links = CreateLinksForUser();
+        }
+
         return Ok(userDto);
+    }
+
+    [HttpPut("me/profile")]
+    public async Task<ActionResult> UpdateProfile(UpdateUserProfileDto dto)
+    {
+        string? userId = await userContext.GetUserIdAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return Unauthorized();
+        }
+
+        User? user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
+        if (user is null)
+        {
+            return NotFound();
+        }
+
+        user.Name = dto.Name;
+        user.UpdatedAtUtc = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    private List<LinkDto> CreateLinksForUser()
+    {
+        List<LinkDto> links = [
+            linkService.Create(nameof(GetCurrentUser), "self", HttpMethods.Get),
+            linkService.Create(nameof(UpdateProfile), "update-profile", HttpMethods.Put)
+            ];
+
+        return links;
     }
 }

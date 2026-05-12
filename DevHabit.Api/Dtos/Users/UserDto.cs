@@ -1,4 +1,6 @@
-﻿namespace DevHabit.Api.Dtos.Users;
+﻿using DevHabit.Api.Dtos.Common;
+
+namespace DevHabit.Api.Dtos.Users;
 
 public sealed record UserDto
 {
@@ -7,4 +9,6 @@ public sealed record UserDto
     public required string Email { get; set; }
     public required DateTime CreatedAtUtc { get; set; }
     public DateTime? UpdatedAtUtc { get; set; }
+
+    public List<LinkDto> Links { get; set; }
 }

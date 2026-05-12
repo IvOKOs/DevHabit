@@ -2,6 +2,7 @@ using DevHabit.Api;
 using DevHabit.Api.Database;
 using DevHabit.Api.Extensions;
 using DevHabit.Api.Middleware;
+using DevHabit.Api.Settings;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -18,7 +19,8 @@ builder.AddApiServices()
     .AddDatabase()
     .AddObservability()
     .AddApplicationServices()
-    .AddAuthenticationServices();
+    .AddAuthenticationServices()
+    .AddCorsPolicy();
 
 
 
@@ -33,6 +35,8 @@ if (app.Environment.IsDevelopment())
 
 //use built-in exception handling middleware
 app.UseExceptionHandler();
+
+app.UseCors(CorsOptions.PolicyName);
 
 app.UseHttpsRedirection();
 
