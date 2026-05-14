@@ -3,7 +3,7 @@ using System.Net.Mime;
 using Asp.Versioning;
 using DevHabit.Api.Database;
 using DevHabit.Api.Dtos.Common;
-using DevHabit.Api.DTOs.Entries;
+using DevHabit.Api.Dtos.Entries;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
 using DevHabit.Api.Services.Sorting;

@@ -1,6 +1,6 @@
 using DevHabit.Api.Dtos.Common;
 
-namespace DevHabit.Api.DTOs.Entries;
+namespace DevHabit.Api.Dtos.Entries;
 
 public sealed record EntryQueryParameters : AcceptHeaderDto
 {

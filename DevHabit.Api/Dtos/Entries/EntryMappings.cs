@@ -1,7 +1,7 @@
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services.Sorting;
 
-namespace DevHabit.Api.DTOs.Entries;
+namespace DevHabit.Api.Dtos.Entries;
 
 public static class EntryMappings
 {

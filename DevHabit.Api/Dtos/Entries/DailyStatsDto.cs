@@ -1,4 +1,4 @@
-namespace DevHabit.Api.DTOs.Entries;
+namespace DevHabit.Api.Dtos.Entries;
 
 public sealed record DailyStatsDto
 {

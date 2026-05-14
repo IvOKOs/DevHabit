@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using DevHabit.Api.Entities;
 
-namespace DevHabit.Api.DTOs.Entries;
+namespace DevHabit.Api.Dtos.Entries;
 
 public static class EntryQueries
 {

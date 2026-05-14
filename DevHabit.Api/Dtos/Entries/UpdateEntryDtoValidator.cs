@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace DevHabit.Api.DTOs.Entries;
+namespace DevHabit.Api.Dtos.Entries;
 
 public sealed class UpdateEntryDtoValidator : AbstractValidator<UpdateEntryDto>
 {

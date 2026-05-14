@@ -44,6 +44,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseMiddleware<ETagMiddleware>();
+
 app.MapControllers();
 
 await app.RunAsync();

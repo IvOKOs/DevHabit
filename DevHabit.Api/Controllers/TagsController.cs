@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace DevHabit.Api.Controllers;
 
 [ApiController]
+[ResponseCache(Duration = 120)]
 [Authorize(Roles = Roles.Member)]
 [Route("tags")]
 [Produces(

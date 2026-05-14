@@ -1,7 +1,7 @@
-using DevHabit.Api.DTOs.Common;
+using DevHabit.Api.Dtos.Common;
 using DevHabit.Api.Entities;
 
-namespace DevHabit.Api.DTOs.Entries;
+namespace DevHabit.Api.Dtos.Entries;
 
 public sealed record EntryDto : ILinksResponse
 {
