@@ -4,6 +4,7 @@ using DevHabit.Api.Dtos.Users;
 using DevHabit.Api.Entities;
 using DevHabit.Api.Services;
 using DevHabit.Api.Settings;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,8 +29,12 @@ public sealed class AuthenticationController(
 
 
     [HttpPost("register")]
-    public async Task<ActionResult<AccessTokensDto>> Register(RegisterUserDto registerUserDto)
+    public async Task<ActionResult<AccessTokensDto>> Register(
+        RegisterUserDto registerUserDto,
+        IValidator<RegisterUserDto> validator)
     {
+        await validator.ValidateAndThrowAsync(registerUserDto);
+
         using IDbContextTransaction transaction = await identityDbContext.Database.BeginTransactionAsync();
         applicationDbContext.Database.SetDbConnection(identityDbContext.Database.GetDbConnection());
         await applicationDbContext.Database.UseTransactionAsync(transaction.GetDbTransaction());

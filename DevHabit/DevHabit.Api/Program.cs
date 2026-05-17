@@ -6,10 +6,10 @@ using DevHabit.Api.Settings;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
-using OpenTelemetry;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
+//using OpenTelemetry;
+//using OpenTelemetry.Metrics;
+//using OpenTelemetry.Resources;
+//using OpenTelemetry.Trace;
 using static DevHabit.Api.DependencyInjection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -49,3 +49,5 @@ app.UseMiddleware<ETagMiddleware>();
 app.MapControllers();
 
 await app.RunAsync();
+
+public partial class Program;

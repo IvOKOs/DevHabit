@@ -24,14 +24,10 @@ public sealed class Habit
     
     public List<HabitTag> HabitTags { get; set; }
     public List<Tag> Tags { get; set; }
-    
+
+    public static string NewId() => $"h_{Guid.CreateVersion7()}";
 }
 
-//public class Milestone
-//{// when these two values are equal => goal is completed
-//    public int Target { get; set; }
-//    public int Current { get; set; }
-//}
 
 
 
