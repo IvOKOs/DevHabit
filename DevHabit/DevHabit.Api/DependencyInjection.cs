@@ -150,7 +150,7 @@ public static class DependencyInjection
             .AddHttpClient("github")// configures http client for calling the github api
             .ConfigureHttpClient(client =>
             {
-                client.BaseAddress = new Uri("https://api.github.com");
+                client.BaseAddress = new Uri(builder.Configuration.GetSection("GitHub:BaseUrl").Get<string>()!);
 
                 client.DefaultRequestHeaders
                     .UserAgent.Add(new ProductInfoHeaderValue("DevHabit", "1.0"));
