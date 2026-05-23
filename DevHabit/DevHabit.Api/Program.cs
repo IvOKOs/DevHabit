@@ -1,15 +1,6 @@
-using DevHabit.Api;
-using DevHabit.Api.Database;
 using DevHabit.Api.Extensions;
 using DevHabit.Api.Middleware;
 using DevHabit.Api.Settings;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
-//using OpenTelemetry;
-//using OpenTelemetry.Metrics;
-//using OpenTelemetry.Resources;
-//using OpenTelemetry.Trace;
 using static DevHabit.Api.DependencyInjection;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
