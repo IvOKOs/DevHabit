@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using Asp.Versioning;
 using DevHabit.Api.Database;
@@ -64,7 +65,15 @@ public static class DependencyInjection
         })
         .AddMvc();
 
-        builder.Services.AddOpenApi();
+        //builder.Services.AddOpenApi();
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.ResolveConflictingActions(options => options.First());// in case of multiple actions with same signature,
+                                                                          // take the first one (can happen with api versioning)
+            string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath);
+        });
 
 
         return builder;

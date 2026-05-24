@@ -21,10 +21,18 @@ namespace DevHabit.Api.Controllers;
     CustomMediaTypeNames.Application.JsonV1,
     CustomMediaTypeNames.Application.HateoasJson,
     CustomMediaTypeNames.Application.HateoasJsonV1)]
+[ProducesResponseType(StatusCodes.Status403Forbidden)]
+[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 public sealed class UsersController(ApplicationDbContext dbContext, UserContext userContext, LinkService linkService) : ControllerBase
 {
+    /// <summary>
+    /// Get user by id. (Admin only)
+    /// </summary>
+    /// <param name="id">The user's id</param>
+    /// <returns>The user's details</returns>
     [Authorize(Roles = Roles.Admin)]
     [HttpGet("{id}")]
+    [ProducesResponseType<UserDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<UserDto>> GetUserById(string id)
     {
         string? userId = await userContext.GetUserIdAsync();
