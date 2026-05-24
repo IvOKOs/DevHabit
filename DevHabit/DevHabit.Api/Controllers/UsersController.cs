@@ -23,7 +23,8 @@ namespace DevHabit.Api.Controllers;
     CustomMediaTypeNames.Application.HateoasJsonV1)]
 [ProducesResponseType(StatusCodes.Status403Forbidden)]
 [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-public sealed class UsersController(ApplicationDbContext dbContext, UserContext userContext, LinkService linkService) : ControllerBase
+public sealed class UsersController(ApplicationDbContext dbContext, UserContext userContext, LinkService linkService) 
+    : ControllerBase
 {
     /// <summary>
     /// Get user by id. (Admin only)

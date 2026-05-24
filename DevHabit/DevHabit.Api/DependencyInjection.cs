@@ -63,17 +63,17 @@ public static class DependencyInjection
                 .Template("application/vnd.dev-habit.hateoas.{version}+json")
                 .Build());
         })
-        .AddMvc();
+        .AddMvc()
+        .AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'VVV";
+            options.SubstituteApiVersionInUrl = true;
+        });
 
         //builder.Services.AddOpenApi();
-        builder.Services.AddSwaggerGen(options =>
-        {
-            options.ResolveConflictingActions(options => options.First());// in case of multiple actions with same signature,
-                                                                          // take the first one (can happen with api versioning)
-            string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            options.IncludeXmlComments(xmlPath);
-        });
+        builder.Services.AddSwaggerGen();
+        builder.Services.ConfigureOptions<ConfigureSwaggerGenOptions>();
+        builder.Services.ConfigureOptions<ConfigureSwaggerUIOptions>();
 
 
         return builder;
